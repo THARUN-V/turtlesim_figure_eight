@@ -15,6 +15,12 @@ class TurtlesimFigEight(Node):
 
         self.turtle2_name = "foxy"
 
+        ## flag to get turtle1 info
+        self.get_t1_x_y = False
+        self.t1_x = 0
+        self.t1_y = 0
+        self.spawned_t2 = False
+
         # flag to check if turtle1 pose is available
         self.turtle1_pose_flag = False
         # flag to localize turtle1 and turtle2
@@ -57,8 +63,11 @@ class TurtlesimFigEight(Node):
         
         # check for turtle1 pose and set turtle2 pose
         if not self.turtle1_pose_flag:
-            self.get_logger().info("-----------------")
-            self.spawn_request(msg.x,msg.y,self.turtle2_name)
+            # self.get_logger().info("-----------------")
+            # self.spawn_request(msg.x,msg.y,self.turtle2_name)
+            self.t1_x = msg.x
+            self.t1_y = msg.y
+            self.get_t1_x_y = True
             self.turtle1_pose_flag = True
         
         # localize tutle1 to check if it completed one full circle
@@ -91,7 +100,13 @@ class TurtlesimFigEight(Node):
             twist_msg = Twist()
             twist_msg.linear.x = 0.1
             twist_msg.angular.z = 0.1
-            self.turtle1_cmd_vel_pub.publish(twist_msg)   
+            self.turtle1_cmd_vel_pub.publish(twist_msg)
+
+        ### check for turtle1 completing circle and spawn turtle2
+        if self.stop_t1_flag and not self.spawned_t2:
+            self.spawn_request(self.t1_x,self.t1_y,self.turtle2_name)
+            self.spawned_t2 = True
+
 
         self.pub_count_t1 += 1
 
